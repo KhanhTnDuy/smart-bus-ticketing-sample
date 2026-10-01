@@ -28,12 +28,15 @@ Module minh hoa **luong day du: Frontend -> REST API -> Backend (JPA) -> CSDL**.
 ## 2. Cac file trong module
 
 Backend (Spring Boot - `backend/SmartBusTicketing`):
-- `.../ticketing/bus/entity/Bus.java` - anh xa bang `buses`
+- `.../ticketing/bus/entity/Bus.java` - anh xa bang `buses` (co `seatRows`, `seatCols`)
+- `.../ticketing/bus/entity/BusSeat.java` - anh xa bang `bus_seats` (so do ghe, sinh tu dong)
 - `.../ticketing/bus/repository/BusRepository.java` - truy cap CSDL
-- `.../ticketing/bus/controller/BusController.java` - REST API `/api/v1/buses`
+- `.../ticketing/bus/repository/BusSeatRepository.java` - truy cap bang `bus_seats`
+- `.../ticketing/bus/controller/BusController.java` - REST API `/api/v1/buses` (them `GET /{id}/seats` lay so do ghe)
 
 Frontend (`frontend/src`):
 - `api/busService.js` - dich vu goi API (co switch mock/that)
+- `utils/seatLayout.js` - sinh/kiem tra so do ghe theo hang x cot (che do mock)
 - `pages/manager/BusManagementPage.jsx` - trang giao dien
 
 ## 3. Chay thu
@@ -84,3 +87,7 @@ Vi du lam module "Chuyen di" (Trip):
 - Xoa = xoa mem: doi `status` sang `INACTIVE`, khong xoa han ban ghi.
 - Ten cot camelCase o Java <-> snake_case o CSDL (Hibernate tu anh xa).
 - Frontend moi service co switch `USE_MOCK` de chay duoc ca khi chua co backend.
+- So do ghe: nhap `seatRows` (1-20) x `seatCols` (1-6) -> `capacity` = hang x cot, backend tu sinh
+  ghe trong bang `bus_seats` voi ma "A1", "A2", "B1"... (hang -> chu cai, cot -> so). Doi hang/cot
+  khi sua xe thi ghe duoc sinh lai. Xe cu khong co hang/cot van nhap tay `capacity`.
+- Sua xe (PUT) doi duoc ca bien so (van kiem tra trung).

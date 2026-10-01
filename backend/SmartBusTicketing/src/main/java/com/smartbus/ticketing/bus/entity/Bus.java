@@ -1,9 +1,9 @@
 package com.smartbus.ticketing.bus.entity;
 
 import jakarta.persistence.*;
+import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 
 // ============================================================================
 // MODULE MAU - Tang ENTITY (anh xa 1 bang trong CSDL thanh 1 class Java)
@@ -26,9 +26,21 @@ public class Bus {
     @Column(length = 100)
     private String model;
 
-    @NotNull(message = "So ghe (capacity) khong duoc rong")
+    // Neu co seatRows/seatCols thi capacity = seatRows * seatCols (controller tu tinh).
+    // Xe cu chua co so do ghe van dung capacity nhap tay.
     @Min(value = 1, message = "So ghe phai lon hon 0")
     private Integer capacity;
+
+    // So do ghe: so hang x so cot (xem BusSeat). Gioi han khop BusController.
+    @Min(value = 1, message = "So hang ghe phai lon hon 0")
+    @Max(value = 20, message = "So hang ghe toi da 20")
+    @Column(name = "seat_rows")
+    private Integer seatRows;
+
+    @Min(value = 1, message = "So cot ghe phai lon hon 0")
+    @Max(value = 6, message = "So cot ghe toi da 6")
+    @Column(name = "seat_cols")
+    private Integer seatCols;
 
     // ACTIVE | MAINTENANCE | INACTIVE - khop ENUM trong schema.sql
     private String status = "ACTIVE";
@@ -41,6 +53,10 @@ public class Bus {
     public void setModel(String model) { this.model = model; }
     public Integer getCapacity() { return capacity; }
     public void setCapacity(Integer capacity) { this.capacity = capacity; }
+    public Integer getSeatRows() { return seatRows; }
+    public void setSeatRows(Integer seatRows) { this.seatRows = seatRows; }
+    public Integer getSeatCols() { return seatCols; }
+    public void setSeatCols(Integer seatCols) { this.seatCols = seatCols; }
     public String getStatus() { return status; }
     public void setStatus(String status) { this.status = status; }
 }
