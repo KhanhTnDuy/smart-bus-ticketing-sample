@@ -91,3 +91,32 @@ Vi du lam module "Chuyen di" (Trip):
   ghe trong bang `bus_seats` voi ma "A1", "A2", "B1"... (hang -> chu cai, cot -> so). Doi hang/cot
   khi sua xe thi ghe duoc sinh lai. Xe cu khong co hang/cot van nhap tay `capacity`.
 - Sua xe (PUT) doi duoc ca bien so (van kiem tra trung).
+
+## 6. Phan quyen va nhat ky thay doi (SCRUM-47)
+Dung chung cho moi module can "chi Admin/Quan ly duoc thao tac + ghi nhat ky", dau tien la Lich trinh.
+
+Backend (`backend/SmartBusTicketing/src/main/java/com/smartbus/ticketing`):
+- `security/RequireRole.java` - annotation, mac dinh `ADMIN`, `MANAGER`. Gan len controller hoac method.
+- `security/RoleInterceptor.java` + `WebConfig.java` - chan API `/api/**`: thieu vai tro -> 401, sai vai tro -> 403.
+- `audit/entity/AuditLog.java`, `audit/repository/AuditLogRepository.java` - bang `audit_logs`.
+- `audit/component/AuditLogger.java` - controller goi `auditLogger.log(request, "SCHEDULE", id, "CREATE", "chi tiet")`.
+- `audit/controller/AuditLogController.java` - `GET /api/v1/audit-logs?entityType=SCHEDULE&entityId=7` (chi ADMIN/MANAGER).
+
+Frontend: `api/auditService.js`, `pages/manager/AuditLogPage.jsx` (gan route giong BusManagementPage).
+
+Cach gan cho ScheduleController:
+```java
+@RestController @RequestMapping("/api/v1/schedules") @RequireRole   // chan quyen ca controller
+public class ScheduleController {
+    @Autowired private AuditLogger auditLogger;
+    @PostMapping @Transactional
+    public ResponseEntity<?> create(@RequestBody Schedule s, HttpServletRequest req) {
+        Schedule saved = repo.save(s);
+        auditLogger.log(req, "SCHEDULE", saved.getId(), "CREATE", "mo ta thay doi");
+        return ResponseEntity.status(HttpStatus.CREATED).body(saved);
+    }
+}
+```
+**Luu y:** du an chua co dang nhap that nen vai tro lay tu header `X-User-Role` (ADMIN|MANAGER) va
+`X-User-Name`; `apiClient` phai gui 2 header nay. Header co the bi gia mao, khi co JWT thi sua
+`RoleInterceptor` doc vai tro tu token, phan con lai giu nguyen.
